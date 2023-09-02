@@ -30,43 +30,46 @@ def count():
 ######################################################################
 @app.route("/picture", methods=["GET"])
 def get_pictures():
-    if data:
-        return jsonify(data), 200
-
-    return {"message": "Internal server error"}, 500
+    return data
 
 ######################################################################
 # GET A PICTURE
 ######################################################################
 @app.route("/picture/<int:id>", methods=["GET"])
 def get_picture_by_id(id):
-    for item in data:
-        if item["id"] == id:
-            return jsonify(item), 200
-    return {"message": "Not found"}, 404
+    for picture in data:
+        if picture["id"] == id:
+            return picture
+    return {"message": "picture not found"}, 404
 
 ######################################################################
 # CREATE A PICTURE
 ######################################################################
 @app.route("/picture", methods=["POST"])
 def create_picture():
-    picture = request.json
-    for item in data:
-        if item["id"] == picture["id"]:
-            return {"Message": f"picture with id {picture['id']} already present"}, 302
-    data.append(picture)
-    return jsonify(picture), 201
+    # get data from the json body
+    picture_in = request.json
+    print(picture_in)
+    # if the id is already there, return 303 with the URL for the resource
+    for picture in data:
+        if picture_in["id"] == picture["id"]:
+            return {
+                "Message": f"picture with id {picture_in['id']} already present"
+            }, 302
+    data.append(picture_in)
+    return picture_in, 201
 
 ######################################################################
 # UPDATE A PICTURE
 ######################################################################
 @app.route("/picture/<int:id>", methods=["PUT"])
 def update_picture(id):
-    picture = request.json
-    for i, item in enumerate(data):
-        if item["id"] == id:
-            data[i] = picture
-            return {"message": "picture updated"}, 204
+    # get data from the json body
+    picture_in = request.json
+    for index, picture in enumerate(data):
+        if picture["id"] == id:
+            data[index] = picture_in
+            return picture, 201
     return {"message": "picture not found"}, 404
 
 ######################################################################
@@ -74,8 +77,8 @@ def update_picture(id):
 ######################################################################
 @app.route("/picture/<int:id>", methods=["DELETE"])
 def delete_picture(id):
-    for i, item in enumerate(data):
-        if item["id"] == id:
-            data.pop(i)
-            return {"message": "picture deleted"}, 204
+    for picture in data:
+        if picture["id"] == id:
+            data.remove(picture)
+            return "", 204
     return {"message": "picture not found"}, 404
